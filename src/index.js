@@ -1,10 +1,11 @@
 import readline from 'readline';
 import { getUserName } from './utils/utils.js';
 import os from 'os';
+import { listDirectory } from './utils/workingDirectory/workingDirectory.js';
 
 let rl = readline.createInterface({
-input: process.stdin,
-output: process.stdout
+    input: process.stdin,
+    output: process.stdout
 });
 
 const userHomeDir = os.homedir();
@@ -19,22 +20,32 @@ process.stdout.write(`Welcome to the File Manager, ${username}!\n`)
 process.stdout.write(pathPhrase)
 
 rl.on('line', (input) => {
-if (input.toLowerCase() === '.exit') return closeStream();
+    switch (input) {
+        case ('.exit'): {
+            closeStream();
+            break;
+        }
+        case ('ls'): {
+            listDirectory(directory);
+            break;
+        }
+    }
 
-try {
-checkCommand()
-} catch(e) {
 
-}
-process.stdout.write(pathPhrase)
+    try {
+        checkCommand()
+    } catch (e) {
+
+    }
+    process.stdout.write(pathPhrase)
 });
 
 rl.on('SIGINT', () => {
-closeStream();
+    closeStream();
 });
 
 const closeStream = () => {
-process.stdout.write(exitPhrase)
-rl.close();
-return;
+    process.stdout.write(exitPhrase)
+    rl.close();
+    return;
 }
