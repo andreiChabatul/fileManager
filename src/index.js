@@ -1,7 +1,10 @@
 import readline from 'readline';
-import { getUserName } from './utils/utils.js';
+import { errorFunction, getUserName } from './utils/utils.js';
 import os from 'os';
 import { listDirectory } from './utils/workingDirectory/workingDirectory.js';
+import path from 'path';
+import { createFileBasic, deleteFileBasic, readFileBasic, renameFileBasic } from './utils/operationFiles/basicOperation.js';
+import { infoOS } from './utils/OSInfo/OSInfo.js';
 
 let rl = readline.createInterface({
     input: process.stdin,
@@ -20,13 +23,51 @@ process.stdout.write(`Welcome to the File Manager, ${username}!\n`)
 process.stdout.write(pathPhrase)
 
 rl.on('line', (input) => {
-    switch (input) {
+    const inputEnter = input.split(' ');
+    switch (inputEnter[0]) {
         case ('.exit'): {
             closeStream();
             break;
         }
         case ('ls'): {
             listDirectory(directory);
+            break;
+        }
+        case ('cat'): {
+            readFileBasic(path.join(directory, inputEnter[1]))
+            break;
+        }
+        case ('add'): {
+            if (inputEnter[1]) {
+                createFileBasic(path.join(directory, inputEnter[1]));
+            } else {
+                errorFunction();
+            }
+            break;
+        }
+        case ('rn'): {
+            if (inputEnter[1] && inputEnter[2]) {
+                renameFileBasic(path.join(directory, inputEnter[1]), path.join(directory, inputEnter[2]));
+            }
+            else {
+                errorFunction();
+            }
+            break;
+        }
+        case ('rm'): {
+            if (inputEnter[1]) {
+                deleteFileBasic(path.join(directory, inputEnter[1]));
+            } else {
+                errorFunction();
+            }
+            break;
+        }
+        case ('os'): {
+            if (inputEnter[1]) {
+                infoOS(inputEnter[1]);
+            } else {
+                errorFunction();
+            }
             break;
         }
     }
