@@ -11,7 +11,13 @@ const errorFunction = () => {
     console.log('Operation failed')
 }
 
+const errorInput = () => {
+    console.log('Invalid input')
+}
+
+
 export {
     getUserName,
-    errorFunction
+    errorFunction,
+    errorInput,
 }

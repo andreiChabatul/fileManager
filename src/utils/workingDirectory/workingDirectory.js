@@ -1,7 +1,41 @@
 import { readdir, lstat } from 'fs/promises';
 import path from 'path';
+import os, { homedir } from 'os';
+import { errorFunction } from '../utils.js';
+import { actualDirectory } from './directory.js';
 
-export const listDirectory = async (pathDirectory) => {
+export const pathDirectory = async (directory) => {
+    let resultPath;
+
+    if (directory.split(':').length > 1) {
+        resultPath = directory
+    } else {
+        resultPath = path.join(actualDirectory.getDirectory(), directory);
+    }
+
+    if (await isDirectory(resultPath)) {
+        actualDirectory.setDirectory(resultPath);
+    } else {
+        errorFunction();
+    };
+}
+
+export const upDirectory = () => {
+    const homeDir = os.homedir().split('\\');
+    const actualDir = actualDirectory.getDirectory().split('\\');
+
+    if (actualDir.length === homeDir.length) {
+        actualDirectory.setDirectory(homeDir.join('\\'));
+    } else {
+        actualDir.pop()
+        actualDirectory.setDirectory(actualDir.join('\\'));
+    }
+}
+
+export const listDirectory = async () => {
+
+    const pathDirectory = actualDirectory.getDirectory();
+
     try {
         const listFiles = await readdir(pathDirectory);
 

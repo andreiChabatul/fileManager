@@ -1,28 +1,24 @@
 import readline from 'readline';
-import { errorFunction, getUserName } from './utils/utils.js';
-import os from 'os';
-import { listDirectory } from './utils/workingDirectory/workingDirectory.js';
-import path from 'path';
-import { createFileBasic, deleteFileBasic, readFileBasic, renameFileBasic } from './utils/operationFiles/basicOperation.js';
+import { errorInput, getUserName } from './utils/utils.js';
+import { listDirectory, pathDirectory, upDirectory } from './utils/workingDirectory/workingDirectory.js';
+import { copyFileBasic, createFileBasic, deleteFileBasic, readFileBasic, renameFileBasic } from './utils/operationFiles/basicOperation.js';
 import { infoOS } from './utils/OSInfo/OSInfo.js';
+import { hashCalc } from './utils/hashCalc/hashCalc.js';
+import { workZlibFile } from './utils/compresFile/compresFile.js';
+import { actualDirectory } from './utils/workingDirectory/directory.js';
 
 let rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-const userHomeDir = os.homedir();
 const username = getUserName();
-let directory = userHomeDir;
-
 const exitPhrase = `Thank you for using File Manager, ${username}, goodbye!`;
-const pathPhrase = `You are currently in ${directory}\n`;
-
 
 process.stdout.write(`Welcome to the File Manager, ${username}!\n`)
-process.stdout.write(pathPhrase)
+actualDirectory.consoleDirectory();
 
-rl.on('line', (input) => {
+rl.on('line', async (input) => {
     const inputEnter = input.split(' ');
     switch (inputEnter[0]) {
         case ('.exit'): {
@@ -30,56 +26,64 @@ rl.on('line', (input) => {
             break;
         }
         case ('ls'): {
-            listDirectory(directory);
+            await listDirectory();
             break;
         }
         case ('cat'): {
-            readFileBasic(path.join(directory, inputEnter[1]))
+            inputEnter[1] ? await readFileBasic(inputEnter[1]) : errorInput();
             break;
         }
         case ('add'): {
-            if (inputEnter[1]) {
-                createFileBasic(path.join(directory, inputEnter[1]));
-            } else {
-                errorFunction();
-            }
+            inputEnter[1] ? createFileBasic(inputEnter[1]) : errorInput();
             break;
         }
         case ('rn'): {
-            if (inputEnter[1] && inputEnter[2]) {
-                renameFileBasic(path.join(directory, inputEnter[1]), path.join(directory, inputEnter[2]));
-            }
-            else {
-                errorFunction();
-            }
+            (inputEnter[1] && inputEnter[2]) ? renameFileBasic(inputEnter[1], inputEnter[2]) : errorInput();
             break;
         }
         case ('rm'): {
-            if (inputEnter[1]) {
-                deleteFileBasic(path.join(directory, inputEnter[1]));
-            } else {
-                errorFunction();
-            }
+            inputEnter[1] ? deleteFileBasic(inputEnter[1]) : errorInput();
             break;
         }
         case ('os'): {
-            if (inputEnter[1]) {
-                infoOS(inputEnter[1]);
-            } else {
-                errorFunction();
-            }
+            inputEnter[1] ? infoOS(inputEnter[1]) : errorInput();
             break;
         }
+        case ('hash'): {
+            inputEnter[1] ? hashCalc(inputEnter[1]) : errorInput();
+            break;
+        }
+        case ('compress'): {
+            (inputEnter[1] && inputEnter[2]) ? workZlibFile(inputEnter[1], inputEnter[2], true) : errorInput();
+            break;
+        }
+        case ('decompress'): {
+            (inputEnter[1] && inputEnter[2]) ? workZlibFile(inputEnter[1], inputEnter[2], false) : errorInput();
+            break;
+        }
+        case ('cd'): {
+            inputEnter[1] ? await pathDirectory(inputEnter[1]) : errorInput();
+            break;
+        }
+        case ('up'): {
+            upDirectory();
+            break;
+        }
+        case ('cp'): {
+            (inputEnter[1] && inputEnter[2]) ? copyFileBasic(inputEnter[1], inputEnter[2], false) : errorInput();
+            break;
+        }
+        case ('mv'): {
+            (inputEnter[1] && inputEnter[2]) ? copyFileBasic(inputEnter[1], inputEnter[2], true) : errorInput();
+            break;
+        }
+        default: {
+            errorInput();
+        }
     }
-
-
-    try {
-        checkCommand()
-    } catch (e) {
-
-    }
-    process.stdout.write(pathPhrase)
+    actualDirectory.consoleDirectory();
 });
+
 
 rl.on('SIGINT', () => {
     closeStream();
